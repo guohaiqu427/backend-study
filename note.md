@@ -159,15 +159,16 @@
 
     const EventEmitter = require("events")
     
-    ---
+    ```js
     class Logger extends EventEmitter {
         log ( message ) {
             console.log(message)
             this.emit("messageLoaded", {a: 1})
         }
     }
-    module.exports = Logger 
-    ---
+    module.exports = Logger ```
+    
+    ```js
     const Logger = require("./logger")
     const logger = new Logger() 
 
@@ -175,7 +176,7 @@
         console.log("listens emit from instance", arg)
     })
 
-    logger.log ("calls emit function from instance")
+    logger.log ("calls emit function from instance")```
 
 
 10. built-in module - http 
