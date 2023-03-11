@@ -20,10 +20,10 @@
 
 3. install node : 
     check node version : 
-        node -v 
+        ```shell node -v 
 
     install node :
-        nodejs.org 
+        ```shell nodejs.org 
 
 4. execute a node js file in node envrionment.
     node filename.js
