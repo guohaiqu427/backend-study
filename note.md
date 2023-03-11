@@ -1,6 +1,9 @@
 # Errors :
-1. Unsupported OP_QUERY command: insert. The client driver may require an upgrade
-    reasoon:  mongoose version has become old or it has not been installed yet 
+1.  ``` shell 
+    Unsupported OP_QUERY command: insert. The client driver may require an upgrade
+    reasoon:  mongoose version has become old or it has not been installed yet
+    
+    ```
     fix: npm i mongoose
 
 # Getting Started 
@@ -178,7 +181,6 @@
     })
 
     logger.log ("calls emit function from instance")
-    ----```
 
 10. built-in module - http 
 
