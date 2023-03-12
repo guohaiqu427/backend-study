@@ -1274,3 +1274,41 @@ Authorization: check if the user has the right to perfom such action <br>
     app.listen(port, ()=> { console.log(`listening on port ${port}`) })
    
     ```
+
+3. lodash
+    npm i lodash
+    _.pick(obj, [prop1, prop2, ....])
+
+4. Hash password
+    ```shell
+    npm i bcrypt 1.0.3 / bcrypt@5.1.0
+    ```
+    ``` javascript
+    const salt = await bcrypt.genSalt(10)
+    user.password = await bcrypt.hash(user.password, salt)
+    ```
+
+5. Authentication  => POST login
+
+    Routes : auth.js 
+    ```javascript 
+    router.post("/", async(req,res) => {
+        const error = validate(req.body).error
+        if(error) return res.status(400).send(error.details[0].message)
+
+        let user = await User.findOne({email: req.body.email})
+        if(!user) return res.status(400).send("invalid emial or password")
+
+        const isVaild = await bcrypt.compare(req.body.password, user.password)
+        if(!isVaild) return res.status(400).send("invalid emial or password")
+        res.send(true)
+    }) 
+
+    function validate(req) {
+        const schema = Joi.object({
+            email: Joi.string().min(5).max(255).required().email(),
+            password: Joi.string().min(5).max(255).required()
+        })
+        return schema.validate(req)
+    }
+    ```
