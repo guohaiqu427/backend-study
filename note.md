@@ -6,6 +6,8 @@
     ```
     fix: npm i mongoose
 
+2. module.exports = auth VS exports = auth
+
 # Getting Started 
 
 1. what is node: 
@@ -1422,8 +1424,39 @@ Authorization: check if the user has the right to perfom such action <br>
     since userId has been added to req obj when passing through auth middlewaere<br>
     ```javascript 
     const auth = require("path to middleware: auth")
-   router.get("/me", auth, async(req,res)=> {
+    router.get("/me", auth, async(req,res)=> {
     const user = await User.findById(req.user._id).select("-password")
     res.send(user)
     })
     ```
+
+12. Role-based Auth 
+    - **need to have a an user who has the property admin first**
+    - **make sure change the user schema, to include the possiblity of having it.**
+    - provide Role information in the jwt, deocde it in auth
+    - pass jwt : auth -> isAdmin 
+    - check isAdmin
+        - 403 : provided token, and you can not access the content
+        - 401 : did not provide token 
+    - pass to route
+
+
+    ```javascript
+    // User model
+    const token = jwt.sign({_id: this._id, isAdmin: this.isAdmin }, config.get("jwtPrivateKey"))
+    ```
+
+    ```javascript 
+    // admin middleware
+        module.exports = function (req, res, next) {
+            if(!req.user.isAdmin) return res.status(403).send("Access Deined")
+            next()
+        }
+    ```
+
+    ```javascript 
+    router.post("/", [auth, admin], async(req, res)=> {})
+
+    ```
+
+# Handling & logging Errors 

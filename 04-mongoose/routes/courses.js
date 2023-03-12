@@ -1,10 +1,12 @@
 const mongoose = require("mongoose")
 const express = require("express")
 const auth = require("../middleware/auth")
+const admin = require("../middleware/admin")
+
 
 const router = express.Router() 
 
-router.post("/", auth ,async (req,res) => {
+router.post("/", [auth, admin] ,async (req,res) => {
     const courseSchema = new mongoose.Schema({
         name: String, 
         author: String, 
