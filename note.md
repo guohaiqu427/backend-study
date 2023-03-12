@@ -852,6 +852,7 @@
     const course = await Course.deleteMany({isPublished: false})
     const course = await Course.findByIdAndRemove(id)
 	```
+
 # Data validation 
 
 1. Mongoose validation concepts 
@@ -1142,15 +1143,8 @@
 
 # Authentication & Authorization 
 
-**
-/api/genres 
-/api/movies 
-/api/customers
-/api/rentals 
-**
-
-/api/users  => POST register
-/api/logins => POST  login
+/api/users  => POST register <br>
+/api/logins => POST  login <br>
 
 1. Authentication VS Authorization <br>
 Authentication :  check if the user is who they claim they are <br>
@@ -1290,7 +1284,12 @@ Authorization: check if the user has the right to perfom such action <br>
 
 5. Authentication  => POST login
 
-    Routes : auth.js 
+    - Routes : auth.js 
+        - validate input 
+        - check existence 
+        - compare password
+        - return 
+
     ```javascript 
     router.post("/", async(req,res) => {
         const error = validate(req.body).error
@@ -1311,4 +1310,120 @@ Authorization: check if the user has the right to perfom such action <br>
         })
         return schema.validate(req)
     }
+    ```
+
+6. JSON WEBTOKEN 
+    Store:  localstorage 
+    usage:  when the login is successful, return JWT to the client,
+            for the user to identify himself later for future api calls 
+    jwt.io 
+    {
+        header: standard 
+        payload: public properties of the user, this is the information fronend needs. 
+        signature: generated on the server (created base on the content, and secret key )
+    }
+
+7. genreate JWT
+    ```shell
+    npm i  jsonwebtoken@8.1.1 / 9.0.1
+    ```
+    ```javascript
+    const jwt = require("jsonwebtoken")
+    const token = jwt.sign({payload}, "secretKey")
+    res.send(token)
+    ```
+
+8. Store secret key with "config"
+    1. install config
+    2. map secret key 
+    3. check secret key existence in index.js 
+    4. get secret in auth.js 
+
+    ```shell 
+    npm i config 
+
+    ```
+    file structure
+    - config
+        - default: ```{"jwtPrivateKey": ""}```
+        - custom-environment-variables : ```{"jwtPrivateKey": "vincent_jwtPrivateKey"}```
+    
+    - set environment variable: ```export vincent_jwtPrivateKey=myPassword```
+
+    ```javascript
+        config.get("jwtPrivateKey") // auth.js
+    ```
+
+    ```javascript 
+        if(!config.get("jwtPrivateKey")) {  // index.js 
+            console.log("FATAL....")
+            process.exit(1)
+        }
+    ```
+
+9. where to implement token. 
+    - token should be set on the header 
+    - token should be generate inside user object
+
+    ``` javascript
+    const jwt = require("jsonwebtoken")
+    const config = require("config")
+
+    userSchema.methods.generateAuthToken = function (){
+    const token = jwt.sign({_id: this._id}, config.get("jwtPrivateKey"))
+        return token
+    }
+    ```
+
+    ``` javascript 
+    const token = user.generateAuthToken()
+    res.send(token)
+    ```
+
+    ``` javascript 
+    const result = await user.save()
+    const token = user.generateAuthToken()
+    res.header("x-auth-token", token).send (result)
+    ```
+
+10. use auth middleware to protect routes
+
+    - middleware 
+        - auth.js
+    
+    ```javascript 
+    const jwt = require("jsonwebtoken")
+    const config = require("config")
+
+    function auth ( req, res, next ) {
+        const token = req.header("x-auth-token")
+        if(!token) return res.status(401).send("Access deined")
+        try{
+            const decoded = jwt.verify(token, config.get("jwtPrivateKey"))  //returns jwt payload
+            req.user = decoded  // add a user property to the req object! pass it to the next middleware
+            next() // pass to next miiddleware
+        }
+        catch(ex){
+            res.status(400).send("Invalid token")
+        }
+    }
+    module.exports = auth // when using exports = auth gives err :
+                          // Error: Route.post() requires a callback function but got a [object Object]
+
+    ```
+
+    ``` javascript 
+    const auth = require("path to middleware: auth")
+    router.post("/", auth, (req, res)=> {})
+    ```
+
+11. get current user
+    use auth middleware to get the use id from req.body, <br>
+    since userId has been added to req obj when passing through auth middlewaere<br>
+    ```javascript 
+    const auth = require("path to middleware: auth")
+   router.get("/me", auth, async(req,res)=> {
+    const user = await User.findById(req.user._id).select("-password")
+    res.send(user)
+    })
     ```

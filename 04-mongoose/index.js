@@ -4,6 +4,7 @@ const config = require("config")
 
 const users = require("./routes/users")
 const auth = require("./routes/auth")
+const courses = require('./routes/courses')
 
 const app= express()
 
@@ -19,6 +20,7 @@ mongoose.connect("mongodb://127.0.0.1:27017/playground",{ useNewUrlParser: true 
 app.use(express.json())
 app.use("/api/users", users)
 app.use("/api/auth", auth)
+app.use("/api/courses", courses)
 
 
 const port = process.env.PORT || 3000 

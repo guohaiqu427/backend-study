@@ -16,7 +16,7 @@ router.post("/", async(req,res) => {
 
     const isVaild = await bcrypt.compare(req.body.password, user.password)
     if(!isVaild) return res.status(400).send("invalid emial or password")
-    const token = jwt.sign({_id:user.id}, config.get("jwtPrivateKey"))
+    const token = user.generateAuthToken()
     res.send(token)
 }) 
 
