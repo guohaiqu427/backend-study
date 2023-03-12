@@ -1142,3 +1142,135 @@
 
 # Authentication & Authorization 
 
+**
+/api/genres 
+/api/movies 
+/api/customers
+/api/rentals 
+**
+
+/api/users  => POST register
+/api/logins => POST  login
+
+1. Authentication VS Authorization <br>
+Authentication :  check if the user is who they claim they are <br>
+Authorization: check if the user has the right to perfom such action <br>
+
+2. create /api/users  => POST register
+    **if input validation failss**
+
+    - User Model :  <br>
+        - Import <Joi Mongoose>
+        - Schema 
+        - Model 
+        - Validate 
+        - Export
+    
+    - Router <br>
+        - Import 
+        - Post
+            - validate input  >  app.use(express.json()) VS bodyParser
+                **can use both of them. However, since express.json() is now already built into express, it is wiser to use express.json() than the bodyParser.json().**
+                **Joi's new version has different implementation**
+            - validate existence
+            - save: "if validation fails, does not save to data base"
+        -Export
+
+    - Index <br>
+        - Import <mongoose, express,users>
+        - Connect
+        - Middleware
+        - Listen 
+
+    ``` javascript 
+    const Joi = require("joi")
+    const mongoose = require("mongoose")
+
+    const userSchema = new mongoose.Schema({
+        name: {
+            type:String, 
+            required: true,
+            minlength: 5,
+            maxlength: 50
+        },
+        email: {
+            type:String, 
+            required: true,
+            minlength: 5,
+            maxlength: 250,
+            unique:true
+        }, 
+        password: {
+            type:String, 
+            required: true,
+            minlength: 5,
+            maxlength: 1024,
+        }
+    })
+
+    const User = mongoose.model( "User", userSchema)
+
+    function validateUser(user) {
+        const schema = Joi.object({
+            name: Joi.string().min(5).max(50).required(),
+            email: Joi.string().min(5).max(255).required().email(),
+            password: Joi.string().min(5).max(255).required()
+        })
+        console.log(user)
+        return schema.validate(user)
+    }
+
+    exports.User = User 
+    exports.validate = validateUser
+    ```
+
+    ``` javascript
+    const {User, validate} = require("../models/users")
+    const mongoose = require("mongoose")
+    const express = require("express")
+    const bodyParser = require('body-parser')
+    var jsonParser = bodyParser.json()
+
+    const router = express.Router() 
+    router.post("/", jsonParser, async(req,res) => {
+        const error = validate(req.body).error
+        if(error) return res.status(400).send(error.details[0].message)
+
+        let user = await User.findOne({email: req.body.email})
+        if(user) return res.status(400).send("user already registered")
+
+        try{
+            user = new User({
+                name: req.body.name,
+                email:req.body.email,
+                password:req.body.password
+            })
+            const result = await user.save()
+            res.send (result)
+        }
+        catch(ex){
+            res.send(ex)
+        }
+    }) 
+
+    module.exports = router
+    ```
+
+
+    ```javascript 
+    const mongoose = require("mongoose")
+    const express = require("express")
+    const users = require("./routes/users")
+    const app= express()
+
+    mongoose.connect("mongodb://127.0.0.1:27017/playground",{ useNewUrlParser: true })
+        .then(()=> {console.log("connected")})
+        .catch((err)=> {console.log("not connected", err)})
+
+    app.use("/api/users", users)
+    app.use(express.json())
+
+    const port = process.env.PORT || 3000 
+    app.listen(port, ()=> { console.log(`listening on port ${port}`) })
+   
+    ```
