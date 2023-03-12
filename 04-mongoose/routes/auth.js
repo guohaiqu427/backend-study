@@ -3,6 +3,8 @@ const mongoose = require("mongoose")
 const express = require("express")
 const bcrypt= require("bcrypt")
 const Joi = require("joi")
+const jwt = require("jsonwebtoken")
+const config = require("config")
 
 const router = express.Router() 
 router.post("/", async(req,res) => {
@@ -14,7 +16,8 @@ router.post("/", async(req,res) => {
 
     const isVaild = await bcrypt.compare(req.body.password, user.password)
     if(!isVaild) return res.status(400).send("invalid emial or password")
-    res.send(true)
+    const token = jwt.sign({_id:user.id}, config.get("jwtPrivateKey"))
+    res.send(token)
 }) 
 
 function validate(req) {
