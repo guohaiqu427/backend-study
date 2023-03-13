@@ -684,17 +684,11 @@
 		- /usr/local/opt/mongodb-community/bin/mongod  ==> data <br>
         - --config /usr/local/etc/mongod.conf          ==> config file
 		
-		
-     
-
-
     e. run mongodb as a macos service <br>
 
         brew services start mongodb-community
         brew services stop mongodb-community 
         brew services restart mongodb-community
-
-
 
     f. Connect and Use MongoDB : mongosh <br>
 
@@ -1460,3 +1454,108 @@ Authorization: check if the user has the right to perfom such action <br>
     ```
 
 # Handling & logging Errors 
+
+- method1: 
+    - middleware
+        - async : extract try/catch 
+        - error : extract error handling 
+    - index : import and use middleware
+
+    1. try/catch method
+        ```javascript
+        try{
+            throw new Error("LOL")
+            const result = await course.save()
+            res.send(result)
+        }
+        catch(ex) {
+            res.status(500).send("Error Message")
+        }
+        ```
+
+    2. extract error handling from "catch" into a middleware function 
+
+        ```javascript
+        module.exports = function (err, req, res, next) {
+            res.status(500).send("Failed")
+        }
+        ```
+        ```javascript
+        const error = require("../middleware/error")
+        ...
+        app.use(error)
+        ```
+        ```javascript 
+        try {
+            throw new Error("LOL")
+            const result = await course.save()
+            res.send(result)
+        }
+        catch(ex) {
+            next(ex)
+        }
+        ```
+
+    3. extact try/catch into a functory function (in middware file) that wraps the original function
+        ``` javascript 
+        module.exports = function asyncMiddleware(handler) {
+            return async (req, res, next) => {
+                try{
+                    await handler(req,res)
+                }
+                catch(ex) {
+                    next(ex)
+                }
+            }
+        }
+        ```
+        ```javascript
+        const asyncMiddleware = require("../middleware/async")
+
+        router.post("/", asyncMiddleware(
+                            async (req,res) => {..} 
+                        )) 
+        ```
+
+- method 2 : 
+    express-async-errors 2.1.0
+    require("express-async-errors") 
+    remove asyncMiddleware() wrapper
+
+- logging error to file and mongodb
+    ```shell
+    npm i winston 
+    npm i winston-mongodb
+    ```
+     
+    - middleware / logger.js 
+        ```javascript
+        const winston = require("winston")
+        require('winston-mongodb');
+        const logger = winston.createLogger({
+            transports: [
+                new winston.transports.Console(),
+                new winston.transports.File({ filename: 'combined.log' }),
+                new winston.transports.MongoDB({db:"mongodb://localhost:27017/playground"})
+            ]
+        });
+        module.exports = logger
+        ```
+    - error.js
+        ```javascript
+        const winston = require("winston")
+        winston.log("error", err.message) || winston.err(err.message)
+        ```
+
+- uncaught exception in console + in file + in db 
+- uncaught rejection in file + in db 
+
+- extract: 
+    - routes
+    - db logic 
+    - logging logic 
+    - config logic 
+    - validation logic
+    
+
+# Unit Testing

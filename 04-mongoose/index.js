@@ -1,7 +1,7 @@
 const mongoose = require("mongoose")
 const express = require("express")
 const config = require("config")
-
+const error = require("./middleware/error")
 const users = require("./routes/users")
 const auth = require("./routes/auth")
 const courses = require('./routes/courses')
@@ -17,11 +17,15 @@ mongoose.connect("mongodb://127.0.0.1:27017/playground",{ useNewUrlParser: true 
     .then(()=> {console.log("connected")})
     .catch((err)=> {console.log("not connected", err)})
 
+
 app.use(express.json())
 app.use("/api/users", users)
 app.use("/api/auth", auth)
 app.use("/api/courses", courses)
+app.use(error)
 
 
 const port = process.env.PORT || 3000 
 app.listen(port, ()=> { console.log(`listening on port ${port}`) })
+
+
