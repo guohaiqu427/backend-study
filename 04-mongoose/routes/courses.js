@@ -14,8 +14,6 @@ const courseSchema = new mongoose.Schema({
 })
 const Course = mongoose.model("Course", courseSchema)
 
-
-
 router.post("/", [auth, admin] , asyncMiddleware(async (req,res) => {
     const course = new Course({
         name: req.body.name, 
@@ -23,7 +21,7 @@ router.post("/", [auth, admin] , asyncMiddleware(async (req,res) => {
         tag: req.body.tag,
         isPublished: true
     })
-    throw new Error("HIIIIII")
+    // throw new Error("HIIIIII")
     const result = await course.save()
     res.send(result)
 

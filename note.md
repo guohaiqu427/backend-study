@@ -1522,12 +1522,12 @@ Authorization: check if the user has the right to perfom such action <br>
     require("express-async-errors") 
     remove asyncMiddleware() wrapper
 
-- logging error to file and mongodb
+- logging error to: file, console & mongodb
     ```shell
     npm i winston 
     npm i winston-mongodb
     ```
-     
+
     - middleware / logger.js 
         ```javascript
         const winston = require("winston")
@@ -1547,15 +1547,60 @@ Authorization: check if the user has the right to perfom such action <br>
         winston.log("error", err.message) || winston.err(err.message)
         ```
 
-- uncaught exception in console + in file + in db 
-- uncaught rejection in file + in db 
+- uncaught exception in console + in file + in db  //sync 
+    ```javascript
+    const logger = require("./middleware/logger")
+
+    process.on("uncaughtException", (ex)=> {
+        logger.error(ex.message, ex)
+        process.exit(1)
+    })
+    
+    throw new Error ("failed during startup")
+    ```
+
+- uncaught rejection in file + in db // async
+    ```javascript
+    const logger = require("./middleware/logger")
+
+    process.on("unhandledRejection", (ex)=> {
+        logger.error(ex.message, ex)
+        process.exit(1)
+    })
+
+    const p = Promise.reject(new Error("Promise Error"))
+    p.then(()=> {console.log("Done")})
+    ```
+
+
+- handing exception & rejection with  logger.exceptions.handle & logger.rejections.handle <br>
+    process.exit(1) is implemented
+    ```javascript
+    const logger = winston.createLogger({
+        transports: [
+            new winston.transports.Console(),
+            new winston.transports.File({ filename: 'combined.log' }),
+            new winston.transports.MongoDB({db:"mongodb://localhost:27017/playground"})
+            
+        ]
+    });
+
+    logger.exceptions.handle(
+        new winston.transports.File({ filename: 'exceptions.log' })
+    )
+    
+    logger.rejections.handle(
+        new winston.transports.File({ filename: 'rejections.log' })
+    );
+    ```
 
 - extract: 
-    - routes
-    - db logic 
-    - logging logic 
-    - config logic 
-    - validation logic
-    
+    - startup 
+        - routes.js 
+        - db.js
+        - logging.js
+        - config.js
+        - validation.js 
+    - index.js
 
 # Unit Testing

@@ -5,8 +5,16 @@ const error = require("./middleware/error")
 const users = require("./routes/users")
 const auth = require("./routes/auth")
 const courses = require('./routes/courses')
+const logger = require("./middleware/logger")
 
 const app= express()
+
+
+  
+// throw new Error ("failed during startup")
+
+// const p = Promise.reject(new Error("Promise Error"))
+// p.then(()=> {console.log("Done")})
 
 if(!config.get("jwtPrivateKey")) {
     console.error("FATAL, jwt private is not set")
