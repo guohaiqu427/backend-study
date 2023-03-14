@@ -1603,4 +1603,57 @@ Authorization: check if the user has the right to perfom such action <br>
         - validation.js 
     - index.js
 
-# Unit Testing
+# Unit Test
+
+1. what is automated testing? 
+    write test code to test production code 
+
+2. what is the benefit?
+    1. fast 
+    2. catch bug before deployment 
+    3. reduce bugs and imporve quality 
+    4. refact code with confidence
+
+3. types of tests: 
+    1. [+++] unit test : test a unit of the an appliction, **without** external dependencies
+    2. [++ ] ingtergation : test the an appliction, **with** external dependencies
+    3. [+  ] E2E test: Test in UI.
+
+4. test frameworks: 
+    use a test framework to write test
+    - jasmine
+    - mocha
+    - **jest**
+
+5. use **Jest** to write unit tests 
+    npm i -D jest 
+    scripts: {test: "jest --watchAll --coverage"}
+
+    - tests
+        - write test cases for a function 
+        - group test cases
+    
+    - test types: 
+        - number 
+        - string 
+        - array
+        - object 
+        - exceptions
+        - mock apiCall function tests
+        - interaction test: test interaction of two objects 
+        - jest mock function 
+
+    - what to test 
+        - unit       : functions and algorithm with no deps, avoid mocks ["jwtkeys"]
+        - intergation: ["api calls"]
+
+# Intergration Test
+
+1. test with database access
+    1. have a database that has necessary data for testing, aka: populate the db
+    2. send request 
+    3. assertion (inspect responce and database)
+
+    npm i suprtest --save-dev 3.0.0
+
+# what is TDD: test driven development 
